@@ -3,6 +3,7 @@ import { Header } from '../../header/header';
 import { DELIVERY_SIZES, DELIVERY_SPEEDS } from './order.config';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UpperCasePipe } from '@angular/common';
+import { DeliveryApi } from '../../services/delivery-api';
 
 declare var ymaps: any;
 
@@ -25,14 +26,14 @@ export class Order {
   public orderId: any = signal(null);
   public calculationResult: any = signal(null);
 
-  constructor(private formBuilder: FormBuilder) {
+
+  constructor(private formBuilder: FormBuilder, private deliveryApi: DeliveryApi) {
     this.routeForm = this.formBuilder.group({
       from: ['', Validators.required],
       to: ['', Validators.required],
       size: ['xs', Validators.required],
       speed: ['regular', Validators.required]
     });
-
     this.orderForm = this.formBuilder.group({
       name: ['', Validators.required],
       phone: ['', [Validators.required]],
@@ -80,13 +81,11 @@ export class Order {
       { referencePoints: [from, to] },
       { boundsAutoApply: false }
     );
-
     this.map.geoObjects.add(this.mapRoute);
 
     this.mapRoute.model.events.add('requestsuccess', () => {
       try {
         const activeRoute = this.mapRoute.getActiveRoute();
-
         if (!activeRoute) {
           return this.failedCalculation();
         }
@@ -94,11 +93,9 @@ export class Order {
         const km = activeRoute.properties.get('distance').value / 1000;
         const sizeValue = size ?? '';
         const sizeConfig = this.sizes.find((item) => item.value === sizeValue);
-
         if (!sizeConfig) {
           return this.failedCalculation();
         }
-
         let total = Math.max(sizeConfig.min, Math.ceil(km * sizeConfig.rate));
         let duration = Math.min(30, 1 + Math.ceil(km / 80));
 
@@ -132,7 +129,6 @@ export class Order {
 
   public submitOrder() {
     const calculation = this.calculationResult();
-
     if (!calculation) {
       alert('Сначала рассчитайте стоимость, чтобы оформить заявку');
       return;
@@ -154,7 +150,15 @@ export class Order {
       createdAt: new Date().toISOString()
     };
 
-    console.log(payload);
-    this.orderId.set(1);
+    this.deliveryApi.createDelivery(payload).subscribe((response) => {
+      if ('error' in response) {
+        alert(response.error);
+        return;
+      }
+
+      this.orderId.set(response.id);
+    });
+
   }
+
 }
