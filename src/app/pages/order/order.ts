@@ -1,20 +1,14 @@
 import { Component, signal } from '@angular/core';
-import { UpperCasePipe } from '@angular/common';
 import { Header } from '../../header/header';
 import { DELIVERY_SIZES, DELIVERY_SPEEDS } from './order.config';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { UpperCasePipe } from '@angular/common';
 
 declare var ymaps: any;
 
 @Component({
   selector: 'app-order',
   imports: [Header, UpperCasePipe, ReactiveFormsModule],
-
   templateUrl: './order.html',
   styleUrl: './order.css',
 })
@@ -25,8 +19,8 @@ export class Order {
   public map: any;
   private mapRoute: any;
 
-  public routeForm!: FormGroup;
-  public orderForm!: FormGroup;
+  public routeForm: FormGroup;
+  public orderForm: FormGroup;
 
   public orderId: any = signal(null);
   public calculationResult: any = signal(null);
@@ -36,13 +30,13 @@ export class Order {
       from: ['', Validators.required],
       to: ['', Validators.required],
       size: ['xs', Validators.required],
-      speed: ['regular', Validators.required],
+      speed: ['regular', Validators.required]
     });
 
     this.orderForm = this.formBuilder.group({
       name: ['', Validators.required],
       phone: ['', [Validators.required]],
-      comment: [''],
+      comment: ['']
     });
   }
 
@@ -51,25 +45,12 @@ export class Order {
       this.map = new ymaps.Map('map', {
         center: [55.751244, 37.618423],
         zoom: 5,
-        controls: ['zoomControl'],
+        controls: ['zoomControl']
       });
 
-      // Подключаем подсказки адресов к полям от Яндекса
-      (new ymaps.SuggestView('from')).events.add(
-        'select',
-        (event: any) =>
-          this.routeForm.controls['from'].setValue(
-            event.get('item')?.value ?? ''
-          )
-      );
-
-      (new ymaps.SuggestView('to')).events.add(
-        'select',
-        (event: any) =>
-          this.routeForm.controls['to'].setValue(
-            event.get('item')?.value ?? ''
-          )
-      );
+      // Подключаем подсказки адресов к полям от яндекса
+      (new ymaps.SuggestView('from')).events.add('select', (event: any) => (this.routeForm.controls['from'].setValue(event.get('item')?.value ?? '')));
+      (new ymaps.SuggestView('to')).events.add('select', (event: any) => (this.routeForm.controls['to'].setValue(event.get('item')?.value ?? '')));
     });
   }
 
@@ -99,11 +80,13 @@ export class Order {
       { referencePoints: [from, to] },
       { boundsAutoApply: false }
     );
+
     this.map.geoObjects.add(this.mapRoute);
 
     this.mapRoute.model.events.add('requestsuccess', () => {
       try {
         const activeRoute = this.mapRoute.getActiveRoute();
+
         if (!activeRoute) {
           return this.failedCalculation();
         }
@@ -111,9 +94,11 @@ export class Order {
         const km = activeRoute.properties.get('distance').value / 1000;
         const sizeValue = size ?? '';
         const sizeConfig = this.sizes.find((item) => item.value === sizeValue);
+
         if (!sizeConfig) {
           return this.failedCalculation();
         }
+
         let total = Math.max(sizeConfig.min, Math.ceil(km * sizeConfig.rate));
         let duration = Math.min(30, 1 + Math.ceil(km / 80));
 
@@ -147,6 +132,7 @@ export class Order {
 
   public submitOrder() {
     const calculation = this.calculationResult();
+
     if (!calculation) {
       alert('Сначала рассчитайте стоимость, чтобы оформить заявку');
       return;
@@ -163,7 +149,11 @@ export class Order {
     const trimmedComment = (comment ?? '').trim();
 
     const payload = {
-      customer: { name: trimmedName, phone: trimmedPhone, comment: trimmedComment },
+      customer: {
+        name: trimmedName,
+        phone: trimmedPhone,
+        comment: trimmedComment
+      },
       calculation: calculation,
       createdAt: new Date().toISOString()
     };

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Header } from '../../header/header';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-track',
@@ -12,7 +12,6 @@ export class Track {
   trackNumber = '';
   trackResult: any = signal(null);
 
-
   trackShipment(): void {
     const rawValue = this.trackNumber.trim();
 
@@ -22,7 +21,9 @@ export class Track {
     }
 
     this.trackResult.set(null);
+
     const numericValue = Number(rawValue);
+
     if (Number.isNaN(numericValue) || numericValue <= 0) {
       alert('Введите корректный номер отправления');
       return;
@@ -45,4 +46,3 @@ export class Track {
     });
   }
 }
-
