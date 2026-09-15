@@ -149,11 +149,7 @@ export class Order {
     const trimmedComment = (comment ?? '').trim();
 
     const payload = {
-      customer: {
-        name: trimmedName,
-        phone: trimmedPhone,
-        comment: trimmedComment
-      },
+      customer: { name: trimmedName, phone: trimmedPhone, comment: trimmedComment },
       calculation: calculation,
       createdAt: new Date().toISOString()
     };

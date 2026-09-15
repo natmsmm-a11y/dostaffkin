@@ -1,6 +1,4 @@
-*,
-*::before,
-*::after {
+*, *::before, *::after {
     box-sizing: border-box;
 }
 
@@ -22,8 +20,7 @@
     font-weight: 500;
 }
 
-html,
-body {
+html, body {
     margin: 0;
     color: #111111;
     font-family: "Roboto", sans-serif;
@@ -113,8 +110,7 @@ body {
     opacity: .85;
 }
 
-input,
-textarea {
+input, textarea {
     width: 100%;
     border: 0;
     outline: none;
@@ -130,8 +126,7 @@ textarea {
     padding: 2px 0;
 }
 
-input::placeholder,
-textarea::placeholder {
+input::placeholder, textarea::placeholder {
     color: #7C7C7C;
 }
 
